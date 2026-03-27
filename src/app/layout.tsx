@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "FACS 3D Simulator",
   description: "Live facial action coding and 3D visualization demo",
+  appleWebApp: {
+    title: "HE-API",
+  },
 };
 
 export default function RootLayout({
