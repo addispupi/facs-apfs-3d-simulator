@@ -1,26 +1,280 @@
 @import "tailwindcss";
 
+/* Brand (titles, primary CTAs, accents) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-primary: #f97416;
+  --brand-accent: #f59d0b;
+  /* Buttons / controls: hover “full” accent */
+  --accent-hover: #e06004;
+  --title-from: var(--brand-primary);
+  --title-to: var(--brand-accent);
+  --tagline-brand: rgb(249 116 22 / 0.58);
+  --selection-brand: rgb(249 116 22 / 0.28);
+}
+
+/* Default until ThemeProvider hydrates */
+:root,
+[data-theme="obsidian"] {
+  --background: #050505;
+  --foreground: #e4e4e7;
+  --foreground-muted: #a1a1aa;
+  --card: #09090b;
+  --card-border: rgb(255 255 255 / 0.06);
+  --card-hover-border: rgb(249 116 22 / 0.28);
+  --glass-bg: rgb(24 24 27 / 0.45);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --glass-hover: rgb(255 255 255 / 0.06);
+  --hud-bottom: rgb(17 24 39 / 0.72);
+  --glow-radial: radial-gradient(
+    circle at 50% 50%,
+    rgb(249 116 22 / 0.14) 0%,
+    transparent 70%
+  );
+  --scene-shell: #080808;
+  --tagline: var(--tagline-brand);
+  --sira-inner: #000000;
+  --selection: var(--selection-brand);
+  --track-bg: rgb(255 255 255 / 0.06);
+  --blendshape-glass-base: rgb(9 9 11 / 0.38);
+  --blendshape-glass-shine: rgb(255 255 255 / 0.12);
+  --blendshape-glass-edge: rgb(255 255 255 / 0.14);
+  /* 3D scene HUD text (WebGL is dark; use these, not page --foreground) */
+  --hud-foreground: var(--foreground);
+  --hud-muted: var(--foreground-muted);
+}
+
+[data-theme="aurora"] {
+  --background: #070b14;
+  --foreground: #e4e4e7;
+  --foreground-muted: #a1a1aa;
+  --card: #0c1220;
+  --card-border: rgb(99 102 241 / 0.12);
+  --card-hover-border: rgb(249 116 22 / 0.32);
+  --glass-bg: rgb(15 23 42 / 0.5);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --glass-hover: rgb(99 102 241 / 0.12);
+  --hud-bottom: rgb(15 23 42 / 0.75);
+  --glow-radial: radial-gradient(
+    circle at 50% 40%,
+    rgb(249 116 22 / 0.12) 0%,
+    transparent 65%
+  );
+  --scene-shell: #0a0f1c;
+  --tagline: var(--tagline-brand);
+  --sira-inner: #0b0f1a;
+  --selection: var(--selection-brand);
+  --track-bg: rgb(255 255 255 / 0.06);
+  --blendshape-glass-base: rgb(15 23 42 / 0.4);
+  --blendshape-glass-shine: rgb(255 255 255 / 0.1);
+  --blendshape-glass-edge: rgb(255 255 255 / 0.12);
+  --hud-foreground: var(--foreground);
+  --hud-muted: var(--foreground-muted);
+}
+
+[data-theme="daylight"] {
+  --background: #f4f4f5;
+  --foreground: #18181b;
+  --foreground-muted: #52525b;
+  --card: #ffffff;
+  --card-border: rgb(0 0 0 / 0.08);
+  --card-hover-border: rgb(249 116 22 / 0.4);
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(0 0 0 / 0.08);
+  --glass-hover: rgb(0 0 0 / 0.04);
+  --hud-bottom: rgb(255 255 255 / 0.82);
+  --glow-radial: radial-gradient(
+    circle at 50% 50%,
+    rgb(249 116 22 / 0.1) 0%,
+    transparent 65%
+  );
+  --scene-shell: #fafafa;
+  --tagline: rgb(249 116 22 / 0.72);
+  --sira-inner: #f4f4f5;
+  --selection: var(--selection-brand);
+  --track-bg: rgb(0 0 0 / 0.08);
+  --blendshape-glass-base: rgb(255 255 255 / 0.42);
+  --blendshape-glass-shine: rgb(255 255 255 / 0.55);
+  --blendshape-glass-edge: rgb(0 0 0 / 0.1);
+  /* WebGL stays dark; light page --foreground would be unreadable on scene glass */
+  --hud-foreground: #e4e4e7;
+  --hud-muted: #b4b4b8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-hud-foreground: var(--hud-foreground);
+  --color-hud-muted: var(--hud-muted);
+  --color-accent-hover: var(--accent-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.35s ease, color 0.25s ease;
+}
+
+@layer utilities {
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+  }
+
+  .sira-gradient-border {
+    position: relative;
+    isolation: isolate;
+    background: var(--sira-inner);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+  }
+
+  .sira-gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    margin: -1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      var(--brand-primary),
+      var(--brand-accent)
+    );
+  }
+}
+
+/**
+ * Brand gradients live OUTSIDE @layer so they win over Tailwind utilities
+ * (fixes missing gradient text / flat buttons in dark & light themes).
+ */
+html .brand-gradient-text {
+  background-image: linear-gradient(
+    90deg,
+    var(--brand-primary),
+    var(--brand-accent)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+html .brand-gradient-text * {
+  color: inherit;
+}
+
+button.brand-gradient-fill,
+a.brand-gradient-fill {
+  background: linear-gradient(
+    135deg,
+    var(--brand-primary),
+    var(--brand-accent)
+  ) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 10px 28px rgb(249 116 22 / 0.28);
+}
+
+button.brand-gradient-fill:hover,
+a.brand-gradient-fill:hover {
+  filter: brightness(1.05);
+}
+
+/** Glossy blendshape HUD: more transparent so the 3D sphere reads through */
+.glass-blendshape-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 2.5rem;
+  border: 1px solid var(--blendshape-glass-edge);
+  background: linear-gradient(
+    165deg,
+    var(--blendshape-glass-shine) 0%,
+    transparent 42%,
+    var(--blendshape-glass-base) 100%
+  );
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 18px 48px rgb(0 0 0 / 0.25);
+}
+
+.glass-blendshape-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.06) 0%,
+    transparent 55%
+  );
+}
+
+.glass-blendshape-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/** Emotion stat chips: same translucent glass as blendshape HUD, tighter radius */
+.glass-stat-hud {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  border: 1px solid var(--blendshape-glass-edge);
+  background: linear-gradient(
+    165deg,
+    var(--blendshape-glass-shine) 0%,
+    transparent 42%,
+    var(--blendshape-glass-base) 100%
+  );
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 18px 48px rgb(0 0 0 / 0.25);
+}
+
+.glass-stat-hud::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgb(255 255 255 / 0.06) 0%,
+    transparent 55%
+  );
+}
+
+.glass-stat-hud > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* HUD emotion stat cards: tint monochrome SVGs; hover → --accent-hover */
+.emotion-stat-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: contain;
+  filter: invert(58%) sepia(85%) saturate(2000%) hue-rotate(352deg)
+    brightness(101%) contrast(101%);
+  transition:
+    filter 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-stat-hud.group:hover .emotion-stat-icon {
+  filter: brightness(0) saturate(100%) invert(40%) sepia(97%) saturate(2000%)
+    hue-rotate(359deg) brightness(99%) contrast(101%);
+  transform: scale(1.06);
 }
