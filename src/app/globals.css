@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Ensure Tailwind scans all app/components */
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+
 /* Brand (titles, primary CTAs, accents) */
 :root {
   --brand-primary: #f97416;
