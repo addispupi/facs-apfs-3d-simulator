@@ -3,6 +3,36 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
+/**
+ * MediaPipe’s WASM stack logs TFLite INFO lines (e.g. XNNPACK delegate) via
+ * `console.error`, which triggers the Next.js dev overlay. Filter those only.
+ */
+function installTfLiteInfoLogFilter(): () => void {
+  if (typeof console === "undefined") return () => {};
+  const orig = console.error;
+  console.error = (...args: unknown[]) => {
+    const combined = args
+      .map((a) =>
+        typeof a === "string"
+          ? a
+          : a instanceof Error
+            ? a.message
+            : String(a)
+      )
+      .join(" ");
+    if (
+      combined.includes("TensorFlow Lite") &&
+      (combined.includes("INFO:") || combined.includes("XNNPACK"))
+    ) {
+      return;
+    }
+    orig.apply(console, args);
+  };
+  return () => {
+    console.error = orig;
+  };
+}
+
 /** Categories from MediaPipe face blendshapes (FACS-style weights). */
 export type FaceBlendShapeCategory = {
   categoryName: string;
@@ -58,6 +88,11 @@ export default function FaceTracker({
   }, []);
 
   useEffect(() => {
+    const removeTfLiteFilter =
+      process.env.NODE_ENV === "development"
+        ? installTfLiteInfoLogFilter()
+        : () => {};
+
     let cancelled = false;
 
     (async () => {
@@ -104,6 +139,7 @@ export default function FaceTracker({
     })();
 
     return () => {
+      removeTfLiteFilter();
       cancelled = true;
       cancelAnimationFrame(rafRef.current);
       faceLandmarkerRef.current?.close();
