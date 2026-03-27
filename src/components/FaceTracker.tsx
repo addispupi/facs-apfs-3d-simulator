@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
 
 /** Categories from MediaPipe face blendshapes (FACS-style weights). */
@@ -11,126 +11,157 @@ export type FaceBlendShapeCategory = {
   index?: number;
 };
 
-type FaceTrackerProps = {
+export type FaceTrackerProps = {
   onBlendshapesUpdate?: (categories: FaceBlendShapeCategory[]) => void;
+  /** Called when the model is loaded and the webcam stream is attached. */
+  onEngineReady?: () => void;
+  /** When false, detection frames stop and video tracks are disabled (frozen feed). */
+  isPlaying?: boolean;
+  /** CSS zoom scale (1–2.5); does not change video dimensions for MediaPipe. */
+  zoom?: number;
+  className?: string;
 };
 
-export default function FluxFridayFaceTracker({
+export default function FaceTracker({
   onBlendshapesUpdate,
+  onEngineReady,
+  isPlaying = true,
+  zoom = 1,
+  className = "",
 }: FaceTrackerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onBlendshapesUpdateRef = useRef(onBlendshapesUpdate);
+  const onEngineReadyRef = useRef(onEngineReady);
   useLayoutEffect(() => {
     onBlendshapesUpdateRef.current = onBlendshapesUpdate;
   }, [onBlendshapesUpdate]);
+  useLayoutEffect(() => {
+    onEngineReadyRef.current = onEngineReady;
+  }, [onEngineReady]);
 
-  const [blendshapes, setBlendshapes] = useState<FaceBlendShapeCategory[]>([]);
-  const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const faceLandmarkerRef = useRef<FaceLandmarker | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const rafRef = useRef<number>(0);
+
+  const [engineReady, setEngineReady] = useState(false);
+
+  const predictFrame = useCallback(() => {
+    const video = videoRef.current;
+    const fm = faceLandmarkerRef.current;
+    if (!video || !fm || video.readyState < 2) return;
+    const startTimeMs = performance.now();
+    const results = fm.detectForVideo(video, startTimeMs);
+    if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
+      const categories = results.faceBlendshapes[0].categories;
+      onBlendshapesUpdateRef.current?.(categories);
+    }
+  }, []);
 
   useEffect(() => {
-    let faceLandMarker: FaceLandmarker;
-    let animationFrameId: number;
+    let cancelled = false;
 
-    const initializeAI = async () => {
-      // 1. Load the WebAssembly files and the AI Model
+    (async () => {
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
       );
-      
-      faceLandMarker = await FaceLandmarker.createFromOptions(vision, {
+      const faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
         baseOptions: {
-          modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-          delegate: "GPU" // Let the GPU do the heavy lifting!
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+          delegate: "GPU",
         },
-        outputFaceBlendshapes: true, // This is the FACS magic switch
+        outputFaceBlendshapes: true,
         runningMode: "VIDEO",
         numFaces: 1,
       });
 
-      setIsModelLoaded(true);
-      startWebcam();
-    };
-
-    const startWebcam = async () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.addEventListener("loadeddata", predictWebcam);
-        }
+      if (cancelled) {
+        faceLandmarker.close();
+        return;
       }
-    };
+      faceLandmarkerRef.current = faceLandmarker;
 
-    const predictWebcam = () => {
-      if (videoRef.current && faceLandMarker) {
-        const startTimeMs = performance.now();
-        // 2. Feed the video frame to the AI
-        const results = faceLandMarker.detectForVideo(videoRef.current, startTimeMs);
-
-        // 3. Extract the FACS Blendshapes if a face is detected
-        if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
-          const categories = results.faceBlendshapes[0].categories;
-          setBlendshapes(categories);
-          onBlendshapesUpdateRef.current?.(categories);
-        }
-
-        // Keep looping
-        animationFrameId = requestAnimationFrame(predictWebcam);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (cancelled) {
+        stream.getTracks().forEach((t) => t.stop());
+        faceLandmarker.close();
+        return;
       }
-    };
+      streamRef.current = stream;
 
-    initializeAI();
+      const video = videoRef.current;
+      if (!video) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      video.srcObject = stream;
+      video.muted = true;
+      await video.play();
 
-    // Cleanup on unmount
+      if (cancelled) return;
+      setEngineReady(true);
+      onEngineReadyRef.current?.();
+    })();
+
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      if (faceLandMarker) faceLandMarker.close();
+      cancelled = true;
+      cancelAnimationFrame(rafRef.current);
+      faceLandmarkerRef.current?.close();
+      faceLandmarkerRef.current = null;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
     };
+    // Mount-only: engine + stream must not restart when parent re-renders (blendshape updates).
   }, []);
 
-  // Filter for the fun ones to show the audience
-  const trackedAUs = ["mouthSmileLeft", "mouthSmileRight", "browInnerUp", "browDownLeft", "eyeBlinkLeft"];
+  useEffect(() => {
+    const stream = streamRef.current;
+    if (!stream || !engineReady) return;
+    stream.getTracks().forEach((t) => {
+      t.enabled = isPlaying;
+    });
+  }, [isPlaying, engineReady]);
+
+  useEffect(() => {
+    if (!engineReady) return;
+
+    function loop() {
+      rafRef.current = requestAnimationFrame(loop);
+      if (!isPlaying) return;
+      predictFrame();
+    }
+
+    loop();
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [engineReady, isPlaying, predictFrame]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-4 text-cyan-400">The API of Human Emotion</h1>
-      {!isModelLoaded && <p className="animate-pulse text-yellow-400">Loading APFS/FACS Engine...</p>}
-      
-      <div className="flex flex-row gap-8 w-full max-w-5xl">
-        {/* The Video Feed */}
-        <div className="flex-1 relative rounded-xl overflow-hidden border-4 border-cyan-500 shadow-2xl shadow-cyan-500/50">
-          {/* Mirror horizontally so movement matches the user */}
+    <div
+      className={`relative h-full min-h-[280px] w-full overflow-hidden ${className}`}
+    >
+      <div className="absolute inset-0 flex items-center justify-center bg-black">
+        {!isPlaying &&
+          engineReady && (
+            <span className="pointer-events-none absolute z-10 font-mono text-xs italic tracking-widest text-zinc-600 uppercase">
+              Feed Suspended
+            </span>
+          )}
+        <div
+          className="h-full w-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]"
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: "center center",
+          }}
+        >
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full h-auto transform scale-x-[-1]"
+            muted
+            className="h-full w-full object-cover [transform:scaleX(-1)]"
           />
         </div>
-
-        {/* The Live Data Console */}
-        <div className="flex-1 bg-black p-6 rounded-xl font-mono text-sm border border-gray-700 overflow-y-auto max-h-[500px]">
-          <h2 className="text-green-400 mb-4 border-b border-gray-700 pb-2">
-            {"// Live FACS Variables"}
-          </h2>
-          {blendshapes.length === 0 ? (
-            <p className="text-gray-500">Waiting for a face...</p>
-          ) : (
-            <ul>
-              {blendshapes
-                .filter(shape => trackedAUs.includes(shape.categoryName))
-                .map((shape) => (
-                  <li key={shape.categoryName} className="mb-2 flex justify-between">
-                    <span className="text-pink-400">{shape.categoryName}:</span>
-                    <span className="text-blue-400">
-                      {/* Format to 3 decimal places for that matrix feel */}
-                      {shape.score.toFixed(3)}
-                    </span>
-                  </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800/20 to-transparent" />
       </div>
     </div>
   );
