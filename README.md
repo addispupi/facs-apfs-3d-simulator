@@ -11,22 +11,12 @@
 
 <div align="center">
 
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/addispupi) [![GitHub stars](https://img.shields.io/github/stars/addispupi/facs-apfs-3d-simulator)](https://github.com/addispupi/weshet-filler/stargazers)
 
-  [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/addispupi)
 
-  [![GitHub stars](https://img.shields.io/github/stars/addispupi/weshet-filler)](https://github.com/addispupi/weshet-filler/stargazers)
+  [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/) [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react)](https://react.dev/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/) [![Three.js](https://img.shields.io/badge/Three.js-0.183-black?style=flat&logo=three.js)](https://threejs.org/) [![MediaPipe](https://img.shields.io/badge/MediaPipe-tasks--vision-4285F4?style=flat&logo=google)](https://developers.google.com/mediapipe) [![pnpm](https://img.shields.io/badge/pnpm-package_manager-F69220?style=flat&logo=pnpm&logoColor=white)](https://pnpm.io/) ![Status](https://img.shields.io/badge/status-active_development-2ea043?style=flat)
+
 </div>
-
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Three.js](https://img.shields.io/badge/Three.js-0.183-black?style=flat&logo=three.js)](https://threejs.org/)
-[![MediaPipe](https://img.shields.io/badge/MediaPipe-tasks--vision-4285F4?style=flat&logo=google)](https://developers.google.com/mediapipe)
-[![pnpm](https://img.shields.io/badge/pnpm-package_manager-F69220?style=flat&logo=pnpm&logoColor=white)](https://pnpm.io/)
-![Status](https://img.shields.io/badge/status-active_development-2ea043?style=flat)
-
 This project translates raw webcam feeds into precise **Facial Action Coding System (FACS)** data and maps it to 3D geometry using the principles of **Anatomically Plausible Facial Systems (APFS)**.
 
 It began as an `AI-Powered` **[Education Learning](siltawi.com)** platform and is evolving toward interactive entertainment workflows and pipeline-oriented decision-making tooling.
