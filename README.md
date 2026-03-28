@@ -1,6 +1,22 @@
-# FACS & APFS 3D Simulator
+<p align="center">
+  <picture>
+    <source srcset="./public/banner_dark.png" media="(prefers-color-scheme: dark)">
+    <source srcset="./public/banner_light.png" media="(prefers-color-scheme: light)">
+    <img src="./public/banner_dark.png" alt="FACS & APFS 3D Simulator">
+  </picture>
 
-### `The API of Human Emotion`
+  <h2 align="center"> FACS & APFS 3D Simulator </h2>
+  <p align="center"> The API of Human Emotion. A real-time, browser-based facial tracking and 3D rendering engine.</p>
+</p>
+
+<div align="center">
+
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
+
+  [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=github)](https://github.com/sponsors/addispupi)
+
+  [![GitHub stars](https://img.shields.io/github/stars/addispupi/weshet-filler)](https://github.com/addispupi/weshet-filler/stargazers)
+</div>
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react)](https://react.dev/)
@@ -11,7 +27,9 @@
 [![pnpm](https://img.shields.io/badge/pnpm-package_manager-F69220?style=flat&logo=pnpm&logoColor=white)](https://pnpm.io/)
 ![Status](https://img.shields.io/badge/status-active_development-2ea043?style=flat)
 
-A real-time, browser-based facial tracking and 3D rendering engine. This project translates raw webcam feeds into precise **Facial Action Coding System (FACS)** data and maps it to 3D geometry using the principles of **Anatomically Plausible Facial Systems (APFS)**. 
+This project translates raw webcam feeds into precise **Facial Action Coding System (FACS)** data and maps it to 3D geometry using the principles of **Anatomically Plausible Facial Systems (APFS)**.
+
+It began as an `AI-Powered` **[Education Learning](siltawi.com)** platform and is evolving toward interactive entertainment workflows and pipeline-oriented decision-making tooling.
 
 ## Table of contents
 
