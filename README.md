@@ -172,3 +172,8 @@ Contributions are welcome. Please open an issue to discuss larger changes before
 4. Describe the motivation and testing performed in the pull request.
 
 Examples of useful contributions include extending **blendshape-to-rig mapping**, improving **accessibility** or **performance**, adding **tests**, or replacing the **placeholder sphere** with a rigged character mesh appropriate to your license and asset pipeline.
+
+---
+<div align="center">
+Made with ❤️ for the community.
+</div>
